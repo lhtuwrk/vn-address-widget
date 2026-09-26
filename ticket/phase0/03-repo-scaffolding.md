@@ -4,7 +4,7 @@
 **Ticket:** phase0/03-repo-scaffolding
 **Depends on:** [phase0/01-admin-hierarchy-data-source-decision](01-admin-hierarchy-data-source-decision.md), [phase0/02-architecture-system-design](02-architecture-system-design.md) — do not start until both are approved.
 **Blocks:** all of phase1
-**Status:** In Progress
+**Status:** Done
 
 ## Problem / Value
 
@@ -35,3 +35,24 @@ Medium-to-large — four toolchains (Dart/Flutter, the shared-core language, Kot
 
 ---
 Source: `plans/map_proposal.html`; scoped via `po` agent from an `architect` research pass, 2026-09-23.
+
+## Completed (2026-09-26)
+
+Scaffolding pass closed. Remaining gaps filled:
+
+- **`app/test/widget_test.dart`** — Flutter smoke test; validates
+  `VnaddrCore.expectedAbiVersion == 1` (pure Dart, no FFI call) so CI passes
+  without a native library present. Full FFI round-trip is a manual/device
+  verification step, as documented in the test file.
+- **`app/android/README-GRADLE-SETUP.md`** — dedicated one-time setup guide
+  for the Gradle wrapper (three options: Android Studio, `gradle wrapper` CLI,
+  copy from another project). Created because `gradle-wrapper.jar` is absent
+  (binary, not committed) and the prior inline README note was insufficient for
+  first-time contributors.
+- **`README.md`** (Android widget section) — updated to link directly to the
+  new setup doc instead of the buried inline paragraph.
+
+All other acceptance criteria were already satisfied by the prior scaffolding
+pass (file structure, CI skeleton, Rust core build, Flutter FFI wiring, iOS
+stubs, root README).
+

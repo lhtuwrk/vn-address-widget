@@ -2,7 +2,7 @@
     <application>
         <receiver
             android:name=".GreetingWidgetReceiver"
-            android:exported="false"
+            android:exported="true"
             android:label="VN Address">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

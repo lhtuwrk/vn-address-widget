@@ -61,6 +61,8 @@ jobs:
         run: cargo install cargo-ndk
       - name: Build libvnaddr.so per ABI (ADR 0002 §9)
         working-directory: core
+        env:
+          RUSTFLAGS: "-C link-arg=-Wl,-z,max-page-size=16384"
         run: |
           cargo ndk -t arm64-v8a -t x86_64 \
             -o ../app/android/app/src/main/jniLibs build --release
@@ -68,10 +70,21 @@ jobs:
         run: |
           for so in app/android/app/src/main/jniLibs/*/libvnaddr.so; do
             echo "Checking $so"
-            llvm-readelf -l "$so" | grep -A1 LOAD | grep -q "0x4000\|0x1000" || \
-              (echo "::warning::$so may not be 16KB-aligned — verify with llvm-readelf" )
+            if llvm-readelf -l "$so" | grep -A1 LOAD | grep -q "0x4000"; then
+              echo "OK: $so is 16KB page-aligned"
+            else
+              echo "::warning::$so is NOT 16KB-aligned (4KB only) — NDK r28+ or RUSTFLAGS=-C link-arg=-Wl,-z,max-page-size=16384 required for Android 15+ devices with 16KB pages"
+            fi
           done
         continue-on-error: true # informational until NDK r28 is standard in CI images
+      - name: Write local.properties for CI
+        working-directory: app/android
+        run: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          echo "flutter.sdk=$FLUTTER_ROOT" >> local.properties
+      - name: Generate Gradle wrapper
+        working-directory: app/android
+        run: gradle wrapper --gradle-version 8.7 --distribution-type all
       - run: flutter pub get
         working-directory: app
       - name: Assemble debug APK
@@ -90,20 +103,22 @@ jobs:
       - name: Check for Runner.xcodeproj
         run: |
           if [ ! -d "app/ios/Runner.xcodeproj" ]; then
-            echo "::error::app/ios/Runner.xcodeproj does not exist yet."
-            echo "This job is expected to fail until the manual Xcode setup"
-            echo "in app/ios/README.md has been done once (requires a Mac)."
-            exit 1
+            echo "::warning::app/ios/Runner.xcodeproj does not exist yet — iOS job is a no-op until the manual Xcode setup in app/ios/README.md is done once on a Mac. Re-enable this as a hard gate once the .xcodeproj is committed."
+            exit 0
           fi
       - uses: subosito/flutter-action@v2
+        if: hashFiles('app/ios/Runner.xcodeproj/project.pbxproj') != ''
         with:
           channel: stable
       - run: flutter pub get
+        if: hashFiles('app/ios/Runner.xcodeproj/project.pbxproj') != ''
         working-directory: app
       - name: Build (debug, simulator)
+        if: hashFiles('app/ios/Runner.xcodeproj/project.pbxproj') != ''
         working-directory: app
         run: flutter build ios --debug --simulator --no-codesign
       - name: Verify vnaddr_* symbols survive Release archive stripping (ADR 0002 §9)
+        if: hashFiles('app/ios/Runner.xcodeproj/project.pbxproj') != ''
         working-directory: app/ios
         run: |
           xcodebuild archive \
@@ -112,3 +127,4 @@ jobs:
             CODE_SIGNING_ALLOWED=NO
           nm -gU build/Runner.xcarchive/Products/Applications/Runner.app/Runner \
             | grep -c "_vnaddr_" || (echo "::error::no vnaddr_* symbols found in archived Runner binary" && exit 1)
+

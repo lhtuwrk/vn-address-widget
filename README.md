@@ -57,12 +57,18 @@ iOS target (`VnAddr.xcframework`) — must be done on a Mac:
 
 ```bash
 cd core
-rustup target add aarch64-apple-ios aarch64-apple-ios-sim
+rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
 cargo build --release --target aarch64-apple-ios
 cargo build --release --target aarch64-apple-ios-sim
+cargo build --release --target x86_64-apple-ios
+# Create a fat simulator slice (arm64 + x86_64) for Intel Mac support
+lipo -create \
+  target/aarch64-apple-ios-sim/release/libvnaddr.a \
+  target/x86_64-apple-ios/release/libvnaddr.a \
+  -output target/libvnaddr-sim-fat.a
 xcodebuild -create-xcframework \
   -library target/aarch64-apple-ios/release/libvnaddr.a -headers include \
-  -library target/aarch64-apple-ios-sim/release/libvnaddr.a -headers include \
+  -library target/libvnaddr-sim-fat.a -headers include \
   -output VnAddr.xcframework
 ```
 
@@ -85,11 +91,12 @@ Built as part of the Flutter app's Android build (`flutter build apk` /
 depends on, not a separate app. See [ADR 0002 §1a/§9](docs/decisions/0002-architecture-system-design.md).
 
 `app/android/` ships `gradle/wrapper/gradle-wrapper.properties` (pins Gradle
-8.7) but not the `gradlew`/`gradlew.bat` wrapper scripts or `gradle-wrapper.jar`
-themselves — run `gradle wrapper` once inside `app/android/` (with any local
-Gradle install) to generate them, or open the project in Android Studio,
-which does this automatically. Also copy `local.properties.example` to
-`local.properties` and fill in real SDK paths first.
+8.7) but **not** the `gradlew`/`gradlew.bat` wrapper scripts or
+`gradle-wrapper.jar` — these are generated artifacts. See
+**[app/android/README-GRADLE-SETUP.md](app/android/README-GRADLE-SETUP.md)**
+for the one-time setup (three options: Android Studio, CLI `gradle wrapper`,
+or copy from another project). Also copy `local.properties.example` to
+`local.properties` and fill in real SDK paths before the first build.
 
 ### iOS widget module
 
