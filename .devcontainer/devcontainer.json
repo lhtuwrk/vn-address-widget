@@ -1,0 +1,54 @@
+{
+  "name": "VN Address Widget",
+  // Ubuntu 22.04 LTS base — stable, well-supported by all devcontainer features below.
+  "image": "mcr.microsoft.com/devcontainers/base:jammy",
+
+  "features": {
+    // Rust stable toolchain + cargo. Installed into /usr/local/cargo.
+    "ghcr.io/devcontainers/features/rust:1": {
+      "version": "stable",
+      "profile": "default"
+    },
+    // Java 17 — required by Gradle / Android build tools.
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17",
+      "jdkDistro": "ms"
+    }
+  },
+
+  // Runs once after the container is created.
+  // Installs Flutter, Android SDK/NDK, Rust Android targets, cargo-ndk.
+  // Takes ~10–15 min on first creation; subsequent opens reuse the cache.
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+
+  // Persistent env vars available in every terminal and VS Code task.
+  "remoteEnv": {
+    "ANDROID_HOME": "/home/vscode/android-sdk",
+    "ANDROID_SDK_ROOT": "/home/vscode/android-sdk",
+    "FLUTTER_ROOT": "/home/vscode/flutter",
+    "PATH": "${containerEnv:PATH}:/home/vscode/android-sdk/cmdline-tools/latest/bin:/home/vscode/android-sdk/platform-tools:/home/vscode/flutter/bin"
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // Flutter + Dart
+        "Dart-Code.flutter",
+        "Dart-Code.dart-code",
+        // Rust
+        "rust-lang.rust-analyzer",
+        // Cargo.toml dependency helper
+        "fill-labs.dependi",
+        // YAML (ci.yml, devcontainer.json)
+        "redhat.vscode-yaml",
+        // Kotlin (Android widget)
+        "mathiasfrohlich.Kotlin"
+      ],
+      "settings": {
+        "dart.flutterSdkPath": "/home/vscode/flutter",
+        "rust-analyzer.cargo.features": "all",
+        "editor.formatOnSave": true
+      }
+    }
+  }
+}
