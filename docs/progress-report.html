@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Progress Report — VN Address Widget App</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --border: #E2E0DA;
+    --text: #1A1916;
+    --text-muted: #7A7870;
+    --accent: #1E6B45;
+    --accent-light: #E8F3ED;
+    --accent-mid: #2E8A58;
+    --tag-bg: #EEECEA;
+    --amber: #9A6B14;
+    --amber-light: #FBF0DD;
+    --grey: #7A7870;
+    --grey-light: #EEECEA;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Be Vietnam Pro', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 32px 120px;
+  }
+
+  /* ── Header ── */
+  .header {
+    border-bottom: 1.5px solid var(--text);
+    padding-bottom: 28px;
+    margin-bottom: 40px;
+  }
+
+  .header-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .06em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .header-meta span { color: var(--border); }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -.02em;
+    max-width: 680px;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .header-sub {
+    margin-top: 14px;
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 640px;
+  }
+
+  /* ── Notice banner ── */
+  .notice {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: var(--amber-light);
+    border: 1px solid #E8D7AE;
+    color: #6E4F0F;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .notice.show { display: flex; }
+
+  .notice.tone-ok {
+    background: var(--accent-light);
+    border-color: #BFE0CD;
+    color: var(--accent);
+  }
+
+  .notice-text { flex: 1; min-width: 220px; }
+
+  .notice code {
+    font-family: var(--mono);
+    background: rgba(0,0,0,.06);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .notice-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .notice-btn {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity .15s ease;
+  }
+
+  .notice-btn:hover { opacity: .7; }
+
+  /* ── Summary stat row ── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 48px;
+  }
+
+  .stat {
+    background: var(--surface);
+    padding: 18px 20px;
+  }
+
+  .stat .n {
+    font-family: var(--mono);
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .stat .l {
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .stat.done .n { color: var(--accent); }
+  .stat.progress .n { color: var(--amber); }
+  .stat.todo .n { color: var(--grey); }
+
+  /* ── Controls ── */
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .filter-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .02em;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+
+  .filter-btn:hover {
+    border-color: var(--text);
+    color: var(--text);
+  }
+
+  .filter-btn.active {
+    background: var(--text);
+    border-color: var(--text);
+    color: var(--bg);
+  }
+
+  .search-box {
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    width: 220px;
+    outline: none;
+  }
+
+  .search-box:focus { border-color: var(--accent); }
+
+  /* ── Sections ── */
+  section.phase {
+    margin-bottom: 40px;
+  }
+
+  .phase-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1.5px solid var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .phase-head-left {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  h2 {
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+
+  .phase-progress {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .phase-bar {
+    width: 120px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--grey-light);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .phase-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+  }
+
+  /* ── Ticket cards ── */
+  .ticket-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ticket {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .ticket-id {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    width: 76px;
+    padding-top: 2px;
+    text-decoration: none;
+  }
+
+  a.ticket-id:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  .ticket-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ticket-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .ticket-note {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    max-width: 640px;
+  }
+
+  .ticket-deps {
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+  }
+
+  .ticket-deps b {
+    font-family: var(--sans);
+    font-weight: 500;
+    color: #9E9B95;
+    font-style: normal;
+  }
+
+  .badge {
+    flex-shrink: 0;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 5px 11px;
+    border-radius: 999px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .badge.done {
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+  .badge.done::before { background: var(--accent); }
+
+  .badge.progress {
+    background: var(--amber-light);
+    color: var(--amber);
+  }
+  .badge.progress::before { background: var(--amber); }
+
+  .badge.todo {
+    background: var(--grey-light);
+    color: var(--grey);
+  }
+  .badge.todo::before { background: var(--grey); }
+
+  .ticket.is-hidden { display: none; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 13.5px;
+    display: none;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media (max-width: 560px) {
+    .ticket { flex-direction: column; gap: 8px; }
+    .ticket-id { width: auto; }
+    .controls { flex-direction: column; align-items: stretch; }
+    .search-box { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-meta">
+      <span>VN Address Widget</span><span>·</span>
+      <span>Progress Report</span><span>·</span>
+      <span id="generated-date"></span>
+    </div>
+    <h1>Build <em>progress</em>, ticket by ticket.</h1>
+    <p class="header-sub" id="header-sub">Read live from the <code>**Status:**</code> field in each <code>ticket/**/*.md</code> file — edit that field to update this report.</p>
+  </div>
+
+  <div class="notice" id="notice"></div>
+
+  <div class="stat-row" id="stat-row"></div>
+
+  <div class="controls">
+    <div class="filter-group" id="filter-group">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="done">Done</button>
+      <button class="filter-btn" data-filter="progress">In Progress</button>
+      <button class="filter-btn" data-filter="todo">Not Started</button>
+    </div>
+    <input type="text" class="search-box" id="search-box" placeholder="Filter by title or id…">
+  </div>
+
+  <div id="phases"></div>
+  <div class="empty-state" id="empty-state">No tickets match this filter.</div>
+
+  <div class="footer">
+    <span>Generated from <code>ticket/</code> and <code>docs/decisions/</code></span>
+    <span id="footer-count"></span>
+  </div>
+
+</div>
+
+<script>
+  // Every path is read live at load time; each file's own `**Status:**`
+  // field (and Phase/Ticket/Depends on/Problem-Value paragraph) is the
+  // source of truth — nothing here is a duplicated snapshot.
+  const TICKET_PATHS = [
+    '../ticket/phase0/01-admin-hierarchy-data-source-decision.md',
+    '../ticket/phase0/02-architecture-system-design.md',
+    '../ticket/phase0/03-repo-scaffolding.md',
+    '../ticket/phase1/01-boundary-dataset-build.md',
+    '../ticket/phase1/02-geocoding-core.md',
+    '../ticket/phase1/03-lookup-screens.md',
+    '../ticket/phase1/04-copy-address.md',
+    '../ticket/phase2/01-android-widgets.md',
+    '../ticket/phase2/02-ios-widgets.md',
+    '../ticket/phase2/03-app-widget-data-bridge.md',
+    '../ticket/phase2/04-location-permission-flow.md',
+    '../ticket/phase3/01-map-picker.md',
+    '../ticket/phase3/02-lookup-history.md',
+    '../ticket/phase3/03-history-export.md',
+    '../ticket/phase4/01-boundary-merge-pipeline.md',
+    '../ticket/phase4/02-data-validation-gate.md',
+    '../ticket/phase4/03-ota-dataset-update.md'
+  ];
+
+  // Used only if this page can't fetch the .md files (e.g. opened as a
+  // file:// document, where browsers block fetch() to sibling files).
+  const FALLBACK_NOTE = 'Trình duyệt này chặn fetch() khi mở trực tiếp file:// và không hỗ trợ chọn thư mục trực tiếp — đang hiển thị bản snapshot gần nhất. Chạy "node docs/generate-progress-report.js" sau khi sửa Status để làm mới, hoặc mở trang qua server HTTP (vd. "python -m http.server" từ thư mục gốc dự án) để đọc trực tiếp.';
+  // AUTO-GENERATED:BEGIN — do not hand-edit; run `node docs/generate-progress-report.js`
+    const FALLBACK_DATA = [
+    {
+      "phase": "phase0",
+      "title": "Phase 0 — Architecture & Foundation",
+      "tickets": [
+        {
+          "id": "phase0/01",
+          "path": "../ticket/phase0/01-admin-hierarchy-data-source-decision.md",
+          "title": "Administrative hierarchy epoch & boundary data source decision",
+          "status": "done",
+          "note": "Even with the epoch decided, the data source's legitimacy and reconciliation approach are not yet settled: GADM's boundaries carry a non-commercial-use license, OSM Geofabrik (used for the Xã level in the original proposal) carries an ODbL share-alike obligati…",
+          "deps": []
+        },
+        {
+          "id": "phase0/02",
+          "path": "../ticket/phase0/02-architecture-system-design.md",
+          "title": "Core architecture & system design decision",
+          "status": "done",
+          "note": "The proposal's stack (`plans/map_proposal.html:1218-1264`) doesn't work as written: Flutter has no home-screen-widget runtime (Android and iOS widgets must be native — Glance/Kotlin and WidgetKit/Swift respectively), and the proposed GEOS-via-FFI with a fully-…",
+          "deps": [
+            "phase0/01"
+          ]
+        },
+        {
+          "id": "phase0/03",
+          "path": "../ticket/phase0/03-repo-scaffolding.md",
+          "title": "Initial repo/project scaffolding",
+          "status": "progress",
+          "note": "The repo is currently empty except for the proposal doc — no code, manifest, tests, or CI. Once the hierarchy/data-source and architecture decisions are approved, the team needs one buildable, multi-language skeleton — Flutter app, shared core, Android/Kotlin…",
+          "deps": [
+            "phase0/01",
+            "phase0/02"
+          ]
+        }
+      ]
+    },
+    {
+      "phase": "phase1",
+      "title": "Phase 1 — M1 MVP core geocoder",
+      "tickets": [
+        {
+          "id": "phase1/01",
+          "path": "../ticket/phase1/01-boundary-dataset-build.md",
+          "title": "Initial boundary dataset build & bundling (M1 slice)",
+          "status": "todo",
+          "note": "M1's geocoder has nothing to query against without a bundled boundary dataset. This ticket is the minimal M1-scoped slice — get one usable, correct finest-level boundary file bundled into the app — not the full data pipeline (merge tooling, OTA updates, automa…",
+          "deps": [
+            "phase0/01",
+            "phase0/03"
+          ]
+        },
+        {
+          "id": "phase1/02",
+          "path": "../ticket/phase1/02-geocoding-core.md",
+          "title": "Geocoding core: lookup, parent resolution, near-boundary, cache",
+          "status": "todo",
+          "note": "This is the actual product value: deterministic, fully offline, correct hierarchy lookup from a coordinate, fast enough for both interactive use and (later) widget refresh.",
+          "deps": [
+            "phase1/01",
+            "phase0/02"
+          ]
+        },
+        {
+          "id": "phase1/03",
+          "path": "../ticket/phase1/03-lookup-screens.md",
+          "title": "Lookup screens — GPS current-location (Home) + manual lat/lng entry",
+          "status": "todo",
+          "note": "The user-facing half of M1: see the current location's address without a map, or type any coordinate to look one up (mockup Home screen, `plans/map_proposal.html:754-809`; manual entry named as a feature at lines 658-659 but never mocked anywhere in §04).",
+          "deps": [
+            "phase1/02"
+          ]
+        },
+        {
+          "id": "phase1/04",
+          "path": "../ticket/phase1/04-copy-address.md",
+          "title": "Copy-address (single format, M1)",
+          "status": "todo",
+          "note": "One-tap copy of the resolved address, matching the single \"Copy địa chỉ\" button actually shown in the Home mockup (`plans/map_proposal.html:791-794`). The proposal's broader claim of \"multiple output formats\" and \"per-level copy\" (§02, line 649-650) is not ref…",
+          "deps": [
+            "phase1/03"
+          ]
+        }
+      ]
+    },
+    {
+      "phase": "phase2",
+      "title": "Phase 2 — M2 Widgets",
+      "tickets": [
+        {
+          "id": "phase2/01",
+          "path": "../ticket/phase2/01-android-widgets.md",
+          "title": "Android home-screen widgets (Glance): small 2×2 + large 4×2",
+          "status": "todo",
+          "note": "Android users get the resolved current-location address glanceable on the home screen without opening the app, per M2's \"Widget nhỏ: GPS auto-update / Widget lớn: 3 cấp + tọa độ\" (`plans/map_proposal.html:1291-1292`).",
+          "deps": [
+            "phase1/02",
+            "phase2/03",
+            "phase2/04"
+          ]
+        },
+        {
+          "id": "phase2/02",
+          "path": "../ticket/phase2/02-ios-widgets.md",
+          "title": "iOS home-screen widgets (WidgetKit): small + large",
+          "status": "todo",
+          "note": "iOS users get the same glanceable current-location widget as Android, working within WidgetKit's stricter background-refresh and process-isolation model.",
+          "deps": [
+            "phase1/02",
+            "phase2/03",
+            "phase2/04"
+          ]
+        },
+        {
+          "id": "phase2/03",
+          "path": "../ticket/phase2/03-app-widget-data-bridge.md",
+          "title": "App↔widget data bridge (dataset access + last_result.json + refresh nudge)",
+          "status": "todo",
+          "note": "Both widget processes need a way to (a) read boundary/geocode data at all, and (b) learn the latest resolved address without a live shared database connection, which risks the iOS `0xdead10cc` suspension crash on concurrent SQLite writers across processes and…",
+          "deps": [
+            "phase1/02",
+            "phase0/02"
+          ]
+        },
+        {
+          "id": "phase2/04",
+          "path": "../ticket/phase2/04-location-permission-flow.md",
+          "title": "Location permission flow (foreground in-app + background widget auto-refresh, both platforms)",
+          "status": "todo",
+          "note": "The GPS-based \"vị trí hiện tại\" feature and widget auto-update both depend on location permission being granted; the proposal's only related bullet is the single unelaborated \"Background location permission handling\" (line 1293) with no denial-state UI specifi…",
+          "deps": [
+            "phase1/03"
+          ]
+        }
+      ]
+    },
+    {
+      "phase": "phase3",
+      "title": "Phase 3 — M3 Map picker + History",
+      "tickets": [
+        {
+          "id": "phase3/01",
+          "path": "../ticket/phase3/01-map-picker.md",
+          "title": "Map picker: tap-to-geocode with result bottom sheet",
+          "status": "todo",
+          "note": "Users currently must know a lat/lng to get an address out of the app (M1's manual-entry screen). The map picker lets a user tap any point on a map and get the same offline administrative-hierarchy lookup without knowing coordinates first — this is the M3 roadm…",
+          "deps": [
+            "phase1/02",
+            "phase0/02"
+          ]
+        },
+        {
+          "id": "phase3/02",
+          "path": "../ticket/phase3/02-lookup-history.md",
+          "title": "Lookup history: storage, date-grouped list, clear-all",
+          "status": "todo",
+          "note": "Users who look up multiple points (via map tap or manual lat/lng entry) want to revisit past results without re-entering coordinates — \"tìm lại không cần nhập lại tọa độ\" (`plans/map_proposal.html:664`). This ticket covers the history list screen shown in the…",
+          "deps": [
+            "phase1/02",
+            "phase3/01"
+          ]
+        },
+        {
+          "id": "phase3/03",
+          "path": "../ticket/phase3/03-history-export.md",
+          "title": "History export (blocked/partially specified)",
+          "status": "todo",
+          "note": "The roadmap lists \"Export danh sách\" (export the list) as an M3 deliverable (`plans/map_proposal.html:1306`) alongside the history feature, presumably so users can get their lookup history out of the app for reporting or sharing. However, no format, destinatio…",
+          "deps": [
+            "phase3/02"
+          ]
+        }
+      ]
+    },
+    {
+      "phase": "phase4",
+      "title": "Phase 4 — M4 Data maintenance tooling",
+      "tickets": [
+        {
+          "id": "phase4/01",
+          "path": "../ticket/phase4/01-boundary-merge-pipeline.md",
+          "title": "Repeatable boundary-merge pipeline (mergers.csv → FlatGeobuf + manifest)",
+          "status": "todo",
+          "note": "Vietnam's administrative boundaries change periodically (Huyện-level updates historically \"1-2 năm/lần\" per `plans/map_proposal.html:1202`; Xã-level \"theo đợt sáp nhập lớn\" per line 1208) — and per [phase0/01](../phase0/01-admin-hierarchy-data-source-decision.…",
+          "deps": [
+            "phase0/01",
+            "phase1/01"
+          ]
+        },
+        {
+          "id": "phase4/02",
+          "path": "../ticket/phase4/02-data-validation-gate.md",
+          "title": "Data validation gate (CI/CD, pre-ship)",
+          "status": "todo",
+          "note": "An incorrect boundary dataset shipped to production would silently mis-geocode users (wrong Tỉnh/Huyện/Xã), which is the core function of the app — there's no manual-review fallback once it's live. The team needs an automated gate that catches structural and g…",
+          "deps": [
+            "phase4/01"
+          ]
+        },
+        {
+          "id": "phase4/03",
+          "path": "../ticket/phase4/03-ota-dataset-update.md",
+          "title": "OTA dataset update & on-device versioning",
+          "status": "todo",
+          "note": "The app is fully offline for its core lookup, but boundary data changes over time and the proposal explicitly wants updates delivered \"không cần release app\" — without an app store release (`plans/map_proposal.html:1318`). Without a safe update mechanism, ever…",
+          "deps": [
+            "phase4/02"
+          ]
+        }
+      ]
+    }
+  ];
+    // AUTO-GENERATED:END
+
+  const STATUS_LABEL = { done: 'Done', progress: 'In Progress', todo: 'Not Started' };
+  const NOTE_MAX = 260;
+
+  function normalizeStatus(raw) {
+    const s = (raw || '').toLowerCase();
+    if (s.includes('done')) return 'done';
+    if (s.includes('progress')) return 'progress';
+    return 'todo';
+  }
+
+  function extractNote(body) {
+    const idx = body.search(/^##\s+Problem\s*\/\s*Value/m);
+    if (idx === -1) return '';
+    const after = body.slice(idx).replace(/^##[^\n]*\n/, '');
+    const nextHeading = after.search(/\n##\s+/);
+    const section = (nextHeading === -1 ? after : after.slice(0, nextHeading)).trim();
+    const firstPara = section.split(/\n\s*\n/)[0].replace(/\s+/g, ' ').trim();
+    return firstPara.length > NOTE_MAX ? firstPara.slice(0, NOTE_MAX).trim() + '…' : firstPara;
+  }
+
+  // Parses one ticket .md's own header fields — this is the "auto read"
+  // step: title, phase, id, deps and status all come from the file text.
+  function parseTicket(path, text) {
+    const titleMatch = text.match(/^#\s+(.+)$/m);
+    const phaseMatch = text.match(/^\*\*Phase:\*\*\s*(.+)$/m);
+    const ticketMatch = text.match(/^\*\*Ticket:\*\*\s*(\S+)/m);
+    const dependsMatch = text.match(/^\*\*Depends on:\*\*\s*(.+)$/m);
+    const statusMatch = text.match(/^\*\*Status:\*\*\s*(.+)$/m);
+
+    if (!titleMatch || !phaseMatch || !ticketMatch) {
+      throw new Error(`${path}: missing required header field(s)`);
+    }
+
+    const phaseNumMatch = phaseMatch[1].match(/^(\d+)\s*[—-]\s*(.+)$/);
+    const phaseNum = phaseNumMatch ? phaseNumMatch[1] : phaseMatch[1].trim();
+    const phaseName = phaseNumMatch ? phaseNumMatch[2].trim() : phaseMatch[1].trim();
+    const idMatch = ticketMatch[1].match(/^(phase\d+\/\d+)/);
+    const id = idMatch ? idMatch[1] : ticketMatch[1];
+    const deps = dependsMatch ? [...new Set(dependsMatch[1].match(/phase\d+\/\d+/g) || [])] : [];
+
+    return {
+      phaseKey: `phase${phaseNum}`,
+      phaseTitle: `Phase ${phaseNum} — ${phaseName}`,
+      ticket: {
+        id,
+        path,
+        title: titleMatch[1].trim(),
+        status: normalizeStatus(statusMatch ? statusMatch[1] : ''),
+        note: extractNote(text),
+        deps
+      }
+    };
+  }
+
+  function buildDataFromTexts(texts) {
+    const parsed = texts.map((text, i) => parseTicket(TICKET_PATHS[i], text));
+    const byPhase = new Map();
+    parsed.forEach(({ phaseKey, phaseTitle, ticket }) => {
+      if (!byPhase.has(phaseKey)) byPhase.set(phaseKey, { phase: phaseKey, title: phaseTitle, tickets: [] });
+      byPhase.get(phaseKey).tickets.push(ticket);
+    });
+
+    return Array.from(byPhase.values())
+      .sort((a, b) => parseInt(a.phase.replace('phase', '')) - parseInt(b.phase.replace('phase', '')))
+      .map(p => ({ ...p, tickets: p.tickets.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true })) }));
+  }
+
+  async function loadLiveData() {
+    const texts = await Promise.all(TICKET_PATHS.map(async path => {
+      const res = await fetch(path);
+      if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`);
+      return res.text();
+    }));
+    return buildDataFromTexts(texts);
+  }
+
+  // File System Access API path (Chromium browsers only): lets a page
+  // opened as a plain file:// document read files from a folder the user
+  // explicitly grants access to — no server and no build step needed.
+  function folderApiSupported() {
+    return typeof window.showDirectoryPicker === 'function';
+  }
+
+  async function resolveTicketRoot(dirHandle) {
+    try {
+      await dirHandle.getDirectoryHandle('phase0');
+      return dirHandle; // user selected the ticket/ folder itself
+    } catch (e) { /* fall through */ }
+    try {
+      return await dirHandle.getDirectoryHandle('ticket');
+    } catch (e) {
+      throw new Error('thư mục đã chọn không phải "ticket" và cũng không chứa nó');
+    }
+  }
+
+  async function loadFromDirectory(dirHandle) {
+    const ticketRoot = await resolveTicketRoot(dirHandle);
+    const texts = await Promise.all(TICKET_PATHS.map(async relPath => {
+      const [phaseDir, fileName] = relPath.replace('../ticket/', '').split('/');
+      const phaseHandle = await ticketRoot.getDirectoryHandle(phaseDir);
+      const fileHandle = await phaseHandle.getFileHandle(fileName);
+      const file = await fileHandle.getFile();
+      return file.text();
+    }));
+    return buildDataFromTexts(texts);
+  }
+
+  let ticketDirHandle = null;
+
+  function renderAll(data) {
+    renderStats(data);
+    renderPhases(data);
+    applyFilters();
+  }
+
+  function renderNotice({ message, tone = 'warn', showConnect = false, showRefresh = false }) {
+    const el = document.getElementById('notice');
+    el.className = `notice show tone-${tone === 'ok' ? 'ok' : 'warn'}`;
+    el.innerHTML = `
+      <div class="notice-text">${message}</div>
+      <div class="notice-actions">
+        ${showConnect ? '<button type="button" id="notice-connect-btn" class="notice-btn">📁 Chọn thư mục dự án</button>' : ''}
+        ${showRefresh ? '<button type="button" id="notice-refresh-btn" class="notice-btn">🔄 Làm mới</button>' : ''}
+      </div>
+    `;
+    if (showConnect) document.getElementById('notice-connect-btn').addEventListener('click', onConnectFolderClick);
+    if (showRefresh) document.getElementById('notice-refresh-btn').addEventListener('click', onRefreshFolderClick);
+  }
+
+  async function onConnectFolderClick() {
+    try {
+      const dirHandle = await window.showDirectoryPicker({ id: 'vnaddr-ticket-folder' });
+      const data = await loadFromDirectory(dirHandle);
+      ticketDirHandle = dirHandle;
+      renderAll(data);
+      renderNotice({
+        message: 'Đang đọc trực tiếp từ thư mục dự án trên máy bạn — không cần server.',
+        tone: 'ok',
+        showRefresh: true
+      });
+    } catch (err) {
+      if (err.name === 'AbortError') return; // user cancelled the picker
+      console.warn('Folder read failed:', err);
+      renderNotice({
+        message: `Không đọc được thư mục đã chọn (${err.message}). Hãy chọn đúng thư mục "ticket", hoặc thư mục gốc dự án chứa nó.`,
+        tone: 'warn',
+        showConnect: true
+      });
+    }
+  }
+
+  async function onRefreshFolderClick() {
+    if (!ticketDirHandle) return;
+    try {
+      const data = await loadFromDirectory(ticketDirHandle);
+      renderAll(data);
+      renderNotice({
+        message: 'Đang đọc trực tiếp từ thư mục dự án trên máy bạn — không cần server.',
+        tone: 'ok',
+        showRefresh: true
+      });
+    } catch (err) {
+      console.warn('Refresh failed:', err);
+      renderNotice({ message: `Làm mới thất bại (${err.message}).`, tone: 'warn', showConnect: true });
+    }
+  }
+
+  function renderStats(data) {
+    let done = 0, progress = 0, todo = 0;
+    data.forEach(p => p.tickets.forEach(t => {
+      if (t.status === 'done') done++;
+      else if (t.status === 'progress') progress++;
+      else todo++;
+    }));
+    const total = done + progress + todo;
+    const statRow = document.getElementById('stat-row');
+    statRow.innerHTML = `
+      <div class="stat">
+        <div class="n">${total}</div>
+        <div class="l">Total tickets</div>
+      </div>
+      <div class="stat done">
+        <div class="n">${done}</div>
+        <div class="l">Done</div>
+      </div>
+      <div class="stat progress">
+        <div class="n">${progress}</div>
+        <div class="l">In progress</div>
+      </div>
+      <div class="stat todo">
+        <div class="n">${todo}</div>
+        <div class="l">Not started</div>
+      </div>
+    `;
+    document.getElementById('footer-count').textContent = `${total} tickets across ${data.length} phases`;
+  }
+
+  function renderPhases(data) {
+    const container = document.getElementById('phases');
+    container.innerHTML = data.map(phase => {
+      const doneCount = phase.tickets.filter(t => t.status === 'done').length;
+      const pct = Math.round((doneCount / phase.tickets.length) * 100);
+      const ticketsHtml = phase.tickets.map(t => `
+        <div class="ticket" data-status="${t.status}" data-search="${(t.id + ' ' + t.title).toLowerCase()}">
+          <a class="ticket-id" href="${t.path}" target="_blank" rel="noopener" title="Open ${t.path}">${t.id}</a>
+          <div class="ticket-body">
+            <div class="ticket-title">${t.title}</div>
+            <div class="ticket-note">${t.note}</div>
+            ${t.deps.length ? `<div class="ticket-deps"><b>Depends on:</b> ${t.deps.join(', ')}</div>` : ''}
+          </div>
+          <span class="badge ${t.status}">${STATUS_LABEL[t.status]}</span>
+        </div>
+      `).join('');
+
+      return `
+        <section class="phase" data-phase="${phase.phase}">
+          <div class="phase-head">
+            <div class="phase-head-left">
+              <span class="section-label">${phase.phase}</span>
+              <h2>${phase.title}</h2>
+            </div>
+            <div class="phase-head-left">
+              <div class="phase-bar"><div class="phase-bar-fill" style="width:${pct}%"></div></div>
+              <span class="phase-progress">${doneCount}/${phase.tickets.length}</span>
+            </div>
+          </div>
+          <div class="ticket-list">${ticketsHtml}</div>
+        </section>
+      `;
+    }).join('');
+  }
+
+  function applyFilters() {
+    const activeStatus = document.querySelector('.filter-btn.active').dataset.filter;
+    const query = document.getElementById('search-box').value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    document.querySelectorAll('.ticket').forEach(el => {
+      const matchesStatus = activeStatus === 'all' || el.dataset.status === activeStatus;
+      const matchesQuery = !query || el.dataset.search.includes(query);
+      const visible = matchesStatus && matchesQuery;
+      el.classList.toggle('is-hidden', !visible);
+      if (visible) visibleCount++;
+    });
+
+    document.querySelectorAll('.phase').forEach(section => {
+      const anyVisible = section.querySelectorAll('.ticket:not(.is-hidden)').length > 0;
+      section.style.display = anyVisible ? '' : 'none';
+    });
+
+    document.getElementById('empty-state').style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+
+  async function init() {
+    document.getElementById('generated-date').textContent = new Date().toISOString().slice(0, 10);
+
+    let data;
+    try {
+      data = await loadLiveData();
+    } catch (err) {
+      console.warn('Live fetch() read failed, using fallback snapshot:', err);
+      data = FALLBACK_DATA;
+      if (folderApiSupported()) {
+        renderNotice({
+          message: 'Trang này đang mở dưới dạng file nên không tự fetch() được — đang hiển thị bản snapshot gần nhất. Bấm nút bên cạnh để đọc trực tiếp từ thư mục dự án trên máy bạn (không cần server, không cần chạy lệnh gì).',
+          tone: 'warn',
+          showConnect: true
+        });
+      } else {
+        renderNotice({ message: FALLBACK_NOTE, tone: 'warn' });
+      }
+    }
+
+    renderStats(data);
+    renderPhases(data);
+
+    document.getElementById('filter-group').addEventListener('click', e => {
+      const btn = e.target.closest('.filter-btn');
+      if (!btn) return;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyFilters();
+    });
+
+    document.getElementById('search-box').addEventListener('input', applyFilters);
+  }
+
+  init();
+</script>
+</body>
+</html>

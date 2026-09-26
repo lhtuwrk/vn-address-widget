@@ -1,0 +1,3 @@
+- [GADM data quirks](gadm-data-quirks.md) — all names space-stripped, CC_3 all NA; "code" = GID only; formatting needs name restoration
+- [Widget GPS auto-update scope](widget-gps-autoupdate-scope.md) — proposal M2 includes it; snapshot-only widget default = dropped scope
+- [ADR 0002 review state](adr-0002-review-state.md) — v1.3: handle item closed; bootstrap needs "v{N} exists -> skip copy, swap pointer"

@@ -1,0 +1,31 @@
+# Rust (core/)
+core/target/
+core/Cargo.lock
+
+# Flutter/Dart (app/)
+app/.dart_tool/
+app/.flutter-plugin-dependencies
+app/build/
+app/.packages
+app/pubspec.lock
+app/**/generated_plugin_registrant.dart
+
+# Android (app/android/)
+app/android/.gradle/
+app/android/**/build/
+app/android/local.properties
+app/android/**/*.iml
+app/android/.idea/
+# libvnaddr.so per ABI is produced by `cargo ndk` (see README) — not checked in.
+app/android/app/src/main/jniLibs/
+
+# iOS (app/ios/)
+app/ios/**/build/
+app/ios/**/DerivedData/
+app/ios/**/*.xcuserstate
+app/ios/**/xcuserdata/
+app/ios/**/Pods/
+
+# OS
+.DS_Store
+Thumbs.db

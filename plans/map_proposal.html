@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Proposal — VN Address Widget App</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --border: #E2E0DA;
+    --text: #1A1916;
+    --text-muted: #7A7870;
+    --accent: #1E6B45;
+    --accent-light: #E8F3ED;
+    --accent-mid: #2E8A58;
+    --tag-bg: #EEECEA;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Be Vietnam Pro', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── Layout ── */
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 60px 32px 120px;
+  }
+
+  /* ── Header ── */
+  .header {
+    border-bottom: 1.5px solid var(--text);
+    padding-bottom: 28px;
+    margin-bottom: 48px;
+  }
+
+  .header-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .06em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .header-meta span { color: var(--border); }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -.02em;
+    max-width: 680px;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .header-sub {
+    margin-top: 14px;
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 540px;
+  }
+
+  /* ── Sections ── */
+  section {
+    margin-bottom: 56px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: #3D3B37;
+    margin-bottom: 12px;
+    max-width: 640px;
+  }
+
+  /* ── Problem block ── */
+  .problem-card {
+    background: var(--text);
+    color: #F7F6F3;
+    border-radius: 10px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+
+  .problem-card h3 {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: #9E9B95;
+    margin-bottom: 12px;
+  }
+
+  .problem-card p {
+    color: #D6D3CD;
+    max-width: 100%;
+    margin-bottom: 0;
+  }
+
+  /* ── Feature grid ── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 4px;
+  }
+
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+  }
+
+  .feature-icon {
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+
+  .feature-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .feature-card p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+    max-width: 100%;
+  }
+
+  /* ── Widget mockup ── */
+  .widget-showcase {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .widget-frame {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px;
+    width: 200px;
+  }
+
+  .widget-frame .w-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .widget-small {
+    background: var(--accent);
+    border-radius: 14px;
+    padding: 14px 16px;
+    color: white;
+  }
+
+  .widget-small .w-addr {
+    font-size: 11px;
+    opacity: .75;
+    margin-bottom: 4px;
+  }
+
+  .widget-small .w-main {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .widget-small .w-coords {
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    opacity: .65;
+  }
+
+  .widget-large {
+    background: var(--text);
+    border-radius: 14px;
+    padding: 16px;
+    color: white;
+    width: 100%;
+  }
+
+  .widget-large .w-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .widget-large .w-level {
+    font-size: 10px;
+    opacity: .5;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  .widget-large .w-val {
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .widget-large .w-divider {
+    height: 1px;
+    background: rgba(255,255,255,.12);
+    margin: 10px 0;
+  }
+
+  .widget-large .w-coords-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 10px;
+    opacity: .4;
+  }
+
+  /* ── Architecture diagram ── */
+  .arch-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px 32px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.8;
+    overflow-x: auto;
+    white-space: pre;
+    color: #3D3B37;
+  }
+
+  .arch-box .c-green { color: var(--accent-mid); }
+  .arch-box .c-muted { color: #9E9B95; }
+  .arch-box .c-accent { color: #1E6B45; font-weight: 600; }
+
+  /* ── Table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-top: 4px;
+  }
+
+  th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 14px 10px 0;
+    border-bottom: 1.5px solid var(--border);
+  }
+
+  td {
+    padding: 12px 14px 12px 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: #3D3B37;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  td:first-child { font-weight: 500; color: var(--text); width: 140px; }
+
+  /* ── Roadmap ── */
+  .roadmap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  .roadmap::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 8px;
+    bottom: 8px;
+    width: 1.5px;
+    background: var(--border);
+  }
+
+  .roadmap-item {
+    display: flex;
+    gap: 20px;
+    position: relative;
+  }
+
+  .roadmap-dot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    margin-top: 2px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .roadmap-dot.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .roadmap-body {
+    padding-bottom: 32px;
+    flex: 1;
+  }
+
+  .roadmap-body h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .roadmap-body .r-time {
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .roadmap-body ul {
+    padding-left: 18px;
+    color: var(--text-muted);
+    font-size: 13.5px;
+  }
+
+  .roadmap-body li { margin-bottom: 3px; }
+
+  /* ── Risk ── */
+  .risk-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .risk-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 20px;
+  }
+
+  .risk-item .r-problem {
+    font-size: 13.5px;
+    font-weight: 500;
+  }
+
+  .risk-item .r-solution {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .risk-item .r-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+  }
+
+  .tag-high { background: #FDE8E8; color: #C0392B; }
+  .tag-med  { background: #FEF3E2; color: #B7770D; }
+  .tag-low  { background: var(--accent-light); color: var(--accent); }
+
+  /* ── Stack chips ── */
+  .stack-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .chip {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12.5px;
+    font-weight: 500;
+  }
+
+  .chip.primary {
+    background: var(--accent-light);
+    border-color: #B8DEC9;
+    color: var(--accent);
+  }
+
+  /* ── Footer ── */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* ── Design rules ── */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .rule-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+
+  .rule-card.full {
+    grid-column: 1 / -1;
+  }
+
+  .rule-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+
+  .rule-tag.color   { background: #EAF0FB; color: #2D5CA8; }
+  .rule-tag.type    { background: #F3EBF9; color: #7B3FA0; }
+  .rule-tag.space   { background: #FEF3E2; color: #B7770D; }
+  .rule-tag.motion  { background: #E8F3ED; color: #1E6B45; }
+  .rule-tag.ban     { background: #FDE8E8; color: #C0392B; }
+
+  .rule-card h3 {
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .rule-card p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+    max-width: 100%;
+    line-height: 1.6;
+  }
+
+  .token-block {
+    margin-top: 10px;
+    background: var(--text);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+
+  .token-block .t-key   { color: rgba(255,255,255,0.4); }
+  .token-block .t-val   { color: #7ED9A8; }
+  .token-block .t-note  { color: rgba(255,255,255,0.22); }
+
+  .ban-list {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .ban-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+
+  .ban-item::before {
+    content: '×';
+    font-size: 13px;
+    font-weight: 700;
+    color: #C0392B;
+    flex-shrink: 0;
+  }
+
+  .allow-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+
+  .allow-item::before {
+    content: '✓';
+    font-size: 12px;
+    font-weight: 700;
+    color: #1E6B45;
+    flex-shrink: 0;
+  }
+
+  .swatch-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .swatch {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .swatch-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .swatch-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 52px;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 600px) {
+    .wrap { padding: 32px 20px 80px; }
+    .risk-item { grid-template-columns: 1fr; }
+    .widget-showcase { flex-direction: column; }
+    .widget-frame { width: 100%; }
+    .rules-grid { grid-template-columns: 1fr; }
+    .rule-card.full { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-meta">
+      Internal Tool <span>·</span> Android / iOS <span>·</span> 21/09/2026
+    </div>
+    <h1>VN Address <em>Widget</em> App</h1>
+    <p class="header-sub">
+      Nhận vào lat/lng, trả về địa chỉ phân cấp hành chính Việt Nam — hiển thị trực tiếp trên màn hình home.
+    </p>
+  </header>
+
+  <!-- 1. Vấn đề -->
+  <section>
+    <div class="section-label">01 — Bài toán</div>
+    <h2>Map trả về địa chỉ không đủ cấp</h2>
+    <div class="problem-card">
+      <h3>Vấn đề thực tế</h3>
+      <p>
+        Khi chấm một điểm trên map, API thường trả về một chuỗi địa chỉ không nhất quán — đôi thiếu cấp huyện, đôi thiếu cấp xã, không theo chuẩn phân cấp hành chính 3–4 cấp của Việt Nam. Muốn lấy địa chỉ đầy đủ từ tọa độ phải mở app, chờ load, rồi tự đọc.
+      </p>
+    </div>
+    <p>
+      App này giải quyết bằng cách: <strong>offline geocoding</strong> với boundary data tự quản lý + widget luôn sẵn ngoài màn hình home.
+    </p>
+  </section>
+
+  <!-- 2. Tính năng -->
+  <section>
+    <div class="section-label">02 — Tính năng chính</div>
+    <h2>Những gì app làm</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📍</div>
+        <h3>Reverse geocode phân cấp</h3>
+        <p>Lat/lng → Tỉnh / Huyện / Xã — chuẩn hành chính VN, không phụ thuộc API ngoài.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🗺️</div>
+        <h3>Chọn điểm trên map</h3>
+        <p>Tap vào bất kỳ điểm nào trên map để lấy địa chỉ ngay, không cần tìm kiếm.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <h3>Copy 1 chạm</h3>
+        <p>Copy chuỗi địa chỉ đầy đủ hoặc từng cấp riêng. Hỗ trợ nhiều format output.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📡</div>
+        <h3>Vị trí hiện tại</h3>
+        <p>Tự động lấy GPS và hiển thị địa chỉ hiện tại — không cần mở app.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>Tra cứu lat/lng thủ công</h3>
+        <p>Nhập tọa độ bất kỳ để tra địa chỉ — dùng cho debug hoặc lookup offline.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <h3>Lịch sử tra cứu</h3>
+        <p>Lưu các điểm đã tra gần đây, tìm lại không cần nhập lại tọa độ.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Widget -->
+  <section>
+    <div class="section-label">03 — Widget</div>
+    <h2>Hiển thị ngoài màn hình home</h2>
+    <p>Hai kích thước widget, người dùng chọn theo nhu cầu.</p>
+    <div class="widget-showcase">
+      <!-- Small widget -->
+      <div class="widget-frame">
+        <div class="w-label">Widget nhỏ (2×2)</div>
+        <div class="widget-small">
+          <div class="w-addr">Địa chỉ hiện tại</div>
+          <div class="w-main">P. Bến Nghé<br>Q.1 · TP.HCM</div>
+          <div class="w-coords">10.7769° N · 106.7009° E</div>
+        </div>
+      </div>
+      <!-- Large widget -->
+      <div class="widget-frame" style="width:280px;">
+        <div class="w-label">Widget lớn (4×2)</div>
+        <div class="widget-large">
+          <div class="w-row">
+            <span class="w-level">Tỉnh / TP</span>
+            <span class="w-val">TP. Hồ Chí Minh</span>
+          </div>
+          <div class="w-row">
+            <span class="w-level">Quận / Huyện</span>
+            <span class="w-val">Quận 1</span>
+          </div>
+          <div class="w-row">
+            <span class="w-level">Phường / Xã</span>
+            <span class="w-val">Phường Bến Nghé</span>
+          </div>
+          <div class="w-divider"></div>
+          <div class="w-coords-row">
+            <span>10.7769° N</span>
+            <span>106.7009° E</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <table style="margin-top:24px;">
+      <thead>
+        <tr>
+          <th>Widget</th>
+          <th>Hiển thị</th>
+          <th>Tap action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Nhỏ 2×2</td>
+          <td>Tỉnh + Huyện + tọa độ rút gọn</td>
+          <td>Mở app → màn hình vị trí hiện tại</td>
+        </tr>
+        <tr>
+          <td>Lớn 4×2</td>
+          <td>Đủ 3 cấp + tọa độ đầy đủ + nút copy</td>
+          <td>Mở app → hoặc copy thẳng từ widget</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 04. UI Screens -->
+  <section>
+    <div class="section-label">04 — UI Screens</div>
+    <h2>Thiết kế màn hình</h2>
+    <p>Bốn màn hình chính của app — Home, Map Picker, Lịch sử, và Home Widgets — thiết kế theo Hallmark modern-minimal, OKLCH color system, Geist + JetBrains Mono.</p>
+
+    <div style="margin-top:20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#1A1916;">
+      <!-- Canvas label bar -->
+      <div style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="display:flex;gap:5px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.12);"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.12);"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.12);"></div>
+          </div>
+          <span style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:0.06em;">Claude Design Canvas</span>
+        </div>
+        <a href="https://claude.ai/artifact/5kDUH5JyQ23onPXkL96b3c" target="_blank" style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.3);text-decoration:none;letter-spacing:0.06em;border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:4px 10px;">Mở canvas ↗</a>
+      </div>
+      <!-- Screens inline preview -->
+      <div style="padding:24px;display:flex;gap:16px;align-items:flex-start;overflow-x:auto;">
+
+        <!-- Screen: Home -->
+        <div style="flex-shrink:0;display:flex;flex-direction:column;gap:8px;align-items:center;">
+          <div style="width:160px;height:347px;background:oklch(97% 0.008 155);border-radius:18px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,0.06);">
+            <!-- Status -->
+            <div style="height:18px;padding:0 10px;display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:7px;font-weight:600;color:#1A1916;font-family:var(--mono);">9:41</span>
+              <div style="width:18px;height:6px;background:#1A1916;border-radius:2px;opacity:0.5;"></div>
+            </div>
+            <!-- Header -->
+            <div style="padding:2px 10px 6px;">
+              <div style="font-size:5px;color:#7A7870;font-family:var(--mono);letter-spacing:0.08em;margin-bottom:2px;">VN·ADDRESS</div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:-0.02em;color:#1A1916;">Vị trí của tôi</div>
+            </div>
+            <!-- GPS pill -->
+            <div style="margin:0 10px 8px;display:inline-flex;align-items:center;gap:3px;background:oklch(94% 0.012 155);border:1px solid oklch(84% 0.010 155);border-radius:999px;padding:2px 6px;">
+              <div style="width:4px;height:4px;border-radius:50%;background:oklch(55% 0.18 145);"></div>
+              <span style="font-size:5px;color:#7A7870;font-family:var(--mono);">GPS · Vừa cập nhật</span>
+            </div>
+            <!-- Address card -->
+            <div style="margin:0 8px;background:#1A1916;border-radius:10px;padding:10px;">
+              <div style="margin-bottom:7px;padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,0.08);">
+                <div style="font-size:4.5px;color:rgba(255,255,255,0.3);font-family:var(--mono);letter-spacing:0.08em;margin-bottom:2px;">TỈNH / THÀNH PHỐ</div>
+                <div style="font-size:9px;font-weight:700;letter-spacing:-0.02em;color:oklch(97% 0.008 155);">TP. Hồ Chí Minh</div>
+              </div>
+              <div style="margin-bottom:7px;padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,0.08);">
+                <div style="font-size:4.5px;color:rgba(255,255,255,0.3);font-family:var(--mono);letter-spacing:0.08em;margin-bottom:2px;">QUẬN / HUYỆN</div>
+                <div style="font-size:9px;font-weight:700;letter-spacing:-0.02em;color:oklch(97% 0.008 155);">Quận 1</div>
+              </div>
+              <div style="margin-bottom:7px;">
+                <div style="font-size:4.5px;color:rgba(255,255,255,0.3);font-family:var(--mono);letter-spacing:0.08em;margin-bottom:2px;">PHƯỜNG / XÃ</div>
+                <div style="font-size:9px;font-weight:700;letter-spacing:-0.02em;color:oklch(97% 0.008 155);">P. Bến Nghé</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.06);border-radius:5px;padding:5px 6px;">
+                <span style="font-size:4.5px;color:rgba(255,255,255,0.35);font-family:var(--mono);">10.7769° N · 106.7009° E</span>
+              </div>
+            </div>
+            <!-- Action -->
+            <div style="padding:6px 8px;display:flex;gap:4px;">
+              <div style="flex:1;height:20px;background:oklch(40% 0.14 155);border-radius:999px;display:flex;align-items:center;justify-content:center;">
+                <span style="font-size:5px;font-weight:600;color:white;">Copy địa chỉ</span>
+              </div>
+              <div style="width:20px;height:20px;background:oklch(94% 0.012 155);border-radius:999px;"></div>
+              <div style="width:20px;height:20px;background:oklch(94% 0.012 155);border-radius:999px;"></div>
+            </div>
+            <!-- Tab bar -->
+            <div style="position:absolute;bottom:0;left:0;right:0;height:33px;background:oklch(97% 0.008 155);border-top:1px solid oklch(84% 0.010 155);display:flex;align-items:center;justify-content:space-around;padding:0 4px;">
+              <div style="width:16px;height:16px;border-radius:50%;background:oklch(92% 0.018 155);display:flex;align-items:center;justify-content:center;">
+                <div style="width:6px;height:6px;background:oklch(40% 0.14 155);border-radius:50%;"></div>
+              </div>
+              <div style="width:14px;height:14px;background:oklch(90% 0.010 155);border-radius:3px;"></div>
+              <div style="width:14px;height:14px;background:oklch(90% 0.010 155);border-radius:3px;"></div>
+              <div style="width:14px;height:14px;background:oklch(90% 0.010 155);border-radius:3px;"></div>
+            </div>
+          </div>
+          <span style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.06em;">HOME</span>
+        </div>
+
+        <!-- Screen: Map -->
+        <div style="flex-shrink:0;display:flex;flex-direction:column;gap:8px;align-items:center;">
+          <div style="width:160px;height:347px;background:oklch(82% 0.022 155);border-radius:18px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,0.06);">
+            <!-- Map bg grid -->
+            <svg width="160" height="347" viewBox="0 0 160 347" style="position:absolute;inset:0;opacity:0.5;">
+              <line x1="0" y1="60" x2="160" y2="60" stroke="oklch(72% 0.018 155)" stroke-width="0.5"/>
+              <line x1="0" y1="120" x2="160" y2="120" stroke="oklch(72% 0.018 155)" stroke-width="0.5"/>
+              <line x1="0" y1="180" x2="160" y2="180" stroke="oklch(72% 0.018 155)" stroke-width="0.5"/>
+              <line x1="0" y1="240" x2="160" y2="240" stroke="oklch(72% 0.018 155)" stroke-width="0.5"/>
+              <line x1="40" y1="0" x2="40" y2="347" stroke="oklch(72% 0.018 155)" stroke-width="0.5"/>
+              <line x1="80" y1="0" x2="80" y2="347" stroke="oklch(72% 0.018 155)" stroke-width="0.5"/>
+              <line x1="120" y1="0" x2="120" y2="347" stroke="oklch(72% 0.018 155)" stroke-width="0.5"/>
+              <path d="M0 140 Q60 120 80 150 Q110 180 160 160" stroke="oklch(76% 0.016 155)" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <path d="M0 140 Q60 120 80 150 Q110 180 160 160" stroke="oklch(80% 0.020 155)" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <rect x="14" y="68" width="38" height="28" rx="2" fill="oklch(76% 0.018 155)" opacity="0.7"/>
+              <rect x="106" y="60" width="35" height="32" rx="2" fill="oklch(76% 0.018 155)" opacity="0.7"/>
+            </svg>
+            <!-- Status + search -->
+            <div style="position:relative;z-index:2;padding:10px 10px 6px;">
+              <div style="height:14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                <span style="font-size:7px;font-weight:600;color:#1A1916;font-family:var(--mono);">9:41</span>
+              </div>
+              <div style="display:flex;gap:4px;">
+                <div style="width:18px;height:18px;border-radius:999px;background:oklch(97% 0.008 155);border:1px solid oklch(84% 0.010 155);"></div>
+                <div style="flex:1;height:18px;background:oklch(97% 0.008 155);border-radius:999px;border:1px solid oklch(84% 0.010 155);"></div>
+              </div>
+            </div>
+            <!-- Pin -->
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-100%) translateY(-2px);z-index:3;">
+              <svg width="16" height="22" viewBox="0 0 16 22" fill="none">
+                <path d="M8 0C3.6 0 0 3.6 0 8C0 14 8 22 8 22C8 22 16 14 16 8C16 3.6 12.4 0 8 0Z" fill="oklch(40% 0.14 155)"/>
+                <circle cx="8" cy="8" r="3.5" fill="oklch(97% 0.008 155)"/>
+                <circle cx="8" cy="8" r="1.5" fill="oklch(40% 0.14 155)"/>
+              </svg>
+            </div>
+            <!-- Bottom sheet -->
+            <div style="position:absolute;bottom:0;left:0;right:0;background:oklch(97% 0.008 155);border-radius:12px 12px 0 0;padding:6px 10px 10px;z-index:3;">
+              <div style="width:16px;height:2px;background:oklch(84% 0.010 155);border-radius:1px;margin:0 auto 8px;"></div>
+              <div style="font-size:4.5px;font-family:var(--mono);letter-spacing:0.1em;color:#7A7870;margin-bottom:5px;text-transform:uppercase;">Điểm được chọn</div>
+              <div style="border:1px solid oklch(84% 0.010 155);border-radius:5px;overflow:hidden;margin-bottom:5px;">
+                <div style="padding:4px 6px;border-bottom:1px solid oklch(84% 0.010 155);display:flex;justify-content:space-between;">
+                  <span style="font-size:4px;font-family:var(--mono);color:#7A7870;">TỈNH / TP</span>
+                  <span style="font-size:6px;font-weight:600;color:#1A1916;">TP. Hồ Chí Minh</span>
+                </div>
+                <div style="padding:4px 6px;border-bottom:1px solid oklch(84% 0.010 155);display:flex;justify-content:space-between;">
+                  <span style="font-size:4px;font-family:var(--mono);color:#7A7870;">HUYỆN</span>
+                  <span style="font-size:6px;font-weight:600;color:#1A1916;">Quận 1</span>
+                </div>
+                <div style="padding:4px 6px;display:flex;justify-content:space-between;">
+                  <span style="font-size:4px;font-family:var(--mono);color:#7A7870;">PHƯỜNG</span>
+                  <span style="font-size:6px;font-weight:600;color:#1A1916;">P. Bến Nghé</span>
+                </div>
+              </div>
+              <div style="height:16px;background:#1A1916;border-radius:999px;display:flex;align-items:center;justify-content:center;">
+                <span style="font-size:5px;font-weight:600;color:oklch(97% 0.008 155);">Copy địa chỉ đầy đủ</span>
+              </div>
+            </div>
+          </div>
+          <span style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.06em;">MAP PICKER</span>
+        </div>
+
+        <!-- Screen: History -->
+        <div style="flex-shrink:0;display:flex;flex-direction:column;gap:8px;align-items:center;">
+          <div style="width:160px;height:347px;background:oklch(97% 0.008 155);border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);">
+            <!-- Status -->
+            <div style="height:18px;padding:0 10px;display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:7px;font-weight:600;color:#1A1916;font-family:var(--mono);">9:41</span>
+            </div>
+            <!-- Header -->
+            <div style="padding:2px 10px 6px;display:flex;align-items:flex-end;justify-content:space-between;">
+              <div>
+                <div style="font-size:5px;color:#7A7870;font-family:var(--mono);letter-spacing:0.08em;margin-bottom:2px;">VN·ADDRESS</div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:-0.02em;color:#1A1916;">Lịch sử</div>
+              </div>
+              <div style="height:12px;padding:0 6px;border:1px solid oklch(84% 0.010 155);border-radius:999px;display:flex;align-items:center;">
+                <span style="font-size:4px;color:#7A7870;font-family:var(--mono);">Xoá tất cả</span>
+              </div>
+            </div>
+            <!-- Search -->
+            <div style="margin:0 8px 8px;height:14px;background:oklch(94% 0.012 155);border-radius:999px;border:1px solid oklch(84% 0.010 155);"></div>
+            <!-- Section -->
+            <div style="padding:0 10px;">
+              <div style="font-size:4.5px;font-family:var(--mono);letter-spacing:0.1em;color:#7A7870;margin-bottom:5px;text-transform:uppercase;">Hôm nay</div>
+              <!-- Active item -->
+              <div style="border:1px solid oklch(40% 0.14 155);border-radius:6px;padding:6px 7px;margin-bottom:5px;display:flex;gap:5px;">
+                <div style="width:14px;height:14px;border-radius:50%;background:oklch(92% 0.018 155);flex-shrink:0;"></div>
+                <div style="flex:1;">
+                  <div style="font-size:6px;font-weight:600;color:#1A1916;margin-bottom:1px;">P. Bến Nghé</div>
+                  <div style="font-size:4.5px;color:#7A7870;">Q.1 · TP.HCM</div>
+                  <div style="font-size:4px;font-family:var(--mono);color:oklch(62% 0.010 155);margin-top:2px;">10.7769° N</div>
+                </div>
+              </div>
+              <!-- Normal item -->
+              <div style="border:1px solid oklch(84% 0.010 155);border-radius:6px;padding:6px 7px;margin-bottom:5px;display:flex;gap:5px;background:white;">
+                <div style="width:14px;height:14px;border-radius:50%;background:oklch(94% 0.012 155);flex-shrink:0;"></div>
+                <div style="flex:1;">
+                  <div style="font-size:6px;font-weight:600;color:#1A1916;margin-bottom:1px;">P. Thảo Điền</div>
+                  <div style="font-size:4.5px;color:#7A7870;">Thủ Đức · TP.HCM</div>
+                </div>
+              </div>
+              <div style="font-size:4.5px;font-family:var(--mono);letter-spacing:0.1em;color:#7A7870;margin:8px 0 5px;text-transform:uppercase;">Hôm qua</div>
+              <div style="border:1px solid oklch(84% 0.010 155);border-radius:6px;padding:6px 7px;margin-bottom:5px;display:flex;gap:5px;background:white;">
+                <div style="width:14px;height:14px;border-radius:50%;background:oklch(94% 0.012 155);flex-shrink:0;"></div>
+                <div style="flex:1;">
+                  <div style="font-size:6px;font-weight:600;color:#1A1916;margin-bottom:1px;">Xã Ea Tiêu</div>
+                  <div style="font-size:4.5px;color:#7A7870;">Cư Kuin · Đắk Lắk</div>
+                </div>
+              </div>
+            </div>
+            <!-- Tab bar -->
+            <div style="position:absolute;bottom:0;left:0;right:0;height:33px;background:oklch(97% 0.008 155);border-top:1px solid oklch(84% 0.010 155);display:flex;align-items:center;justify-content:space-around;padding:0 4px;">
+              <div style="width:14px;height:14px;background:oklch(90% 0.010 155);border-radius:3px;"></div>
+              <div style="width:14px;height:14px;background:oklch(90% 0.010 155);border-radius:3px;"></div>
+              <div style="width:16px;height:16px;border-radius:50%;background:oklch(92% 0.018 155);display:flex;align-items:center;justify-content:center;">
+                <div style="width:6px;height:6px;background:oklch(40% 0.14 155);border-radius:50%;"></div>
+              </div>
+              <div style="width:14px;height:14px;background:oklch(90% 0.010 155);border-radius:3px;"></div>
+            </div>
+          </div>
+          <span style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.06em;">LỊCH SỬ</span>
+        </div>
+
+        <!-- Widgets artboard -->
+        <div style="flex-shrink:0;display:flex;flex-direction:column;gap:8px;align-items:center;">
+          <div style="width:220px;height:347px;background:#1A1916;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;padding:16px;justify-content:center;gap:14px;">
+            <div style="font-size:5px;font-family:var(--mono);letter-spacing:0.1em;color:rgba(255,255,255,0.25);margin-bottom:4px;text-transform:uppercase;">Home Screen Widgets</div>
+            <!-- 2x2 widget -->
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div>
+                <div style="font-size:4px;font-family:var(--mono);color:rgba(255,255,255,0.2);margin-bottom:4px;text-transform:uppercase;">2×2</div>
+                <div style="width:68px;height:68px;background:oklch(40% 0.14 155);border-radius:10px;padding:7px;display:flex;flex-direction:column;justify-content:space-between;">
+                  <div>
+                    <div style="font-size:6px;font-weight:700;color:oklch(97% 0.008 155);letter-spacing:-0.01em;">P. Bến Nghé</div>
+                    <div style="font-size:5px;color:rgba(255,255,255,0.6);">Q.1 · TP.HCM</div>
+                  </div>
+                  <div style="font-size:4px;font-family:var(--mono);color:rgba(255,255,255,0.3);">10.7769° N</div>
+                </div>
+              </div>
+              <!-- 4x2 widget -->
+              <div style="flex:1;">
+                <div style="font-size:4px;font-family:var(--mono);color:rgba(255,255,255,0.2);margin-bottom:4px;text-transform:uppercase;">4×2</div>
+                <div style="height:68px;background:oklch(23% 0.012 155);border-radius:10px;padding:6px 8px;border:1px solid oklch(28% 0.010 155);display:flex;flex-direction:column;justify-content:space-between;">
+                  <div style="display:flex;align-items:center;gap:3px;">
+                    <div style="width:4px;height:4px;border-radius:50%;background:oklch(55% 0.18 145);"></div>
+                    <span style="font-size:4px;font-family:var(--mono);color:rgba(255,255,255,0.3);">GPS · VN·ADDRESS</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:0;">
+                    <div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid oklch(28% 0.010 155);">
+                      <span style="font-size:4px;font-family:var(--mono);color:rgba(255,255,255,0.25);">TỈNH</span>
+                      <span style="font-size:5.5px;font-weight:700;color:oklch(94% 0.008 155);">TP. Hồ Chí Minh</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid oklch(28% 0.010 155);">
+                      <span style="font-size:4px;font-family:var(--mono);color:rgba(255,255,255,0.25);">HUYỆN</span>
+                      <span style="font-size:5.5px;font-weight:700;color:oklch(94% 0.008 155);">Quận 1</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:2px 0;">
+                      <span style="font-size:4px;font-family:var(--mono);color:rgba(255,255,255,0.25);">XÃ</span>
+                      <span style="font-size:5.5px;font-weight:700;color:oklch(94% 0.008 155);">P. Bến Nghé</span>
+                    </div>
+                  </div>
+                  <div style="font-size:4px;font-family:var(--mono);color:rgba(255,255,255,0.2);">10.7769°N · 106.7009°E</div>
+                </div>
+              </div>
+            </div>
+            <!-- Legend -->
+            <div style="display:flex;flex-direction:column;gap:4px;margin-top:4px;">
+              <div style="display:flex;align-items:center;gap:5px;">
+                <div style="width:5px;height:5px;border-radius:50%;background:oklch(40% 0.14 155);flex-shrink:0;"></div>
+                <span style="font-size:5px;font-family:var(--mono);color:rgba(255,255,255,0.25);">Offline — không cần mạng</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;">
+                <div style="width:5px;height:5px;border-radius:50%;background:oklch(55% 0.18 145);flex-shrink:0;"></div>
+                <span style="font-size:5px;font-family:var(--mono);color:rgba(255,255,255,0.25);">GPS auto-update</span>
+              </div>
+            </div>
+          </div>
+          <span style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.06em;">WIDGETS</span>
+        </div>
+
+      </div>
+    </div>
+
+    <p style="margin-top:14px;font-size:13px;color:var(--text-muted);">
+      Thiết kế theo Hallmark modern-minimal — OKLCH color system, Geist + JetBrains Mono, hairline borders, pill CTAs. <a href="https://claude.ai/artifact/5kDUH5JyQ23onPXkL96b3c" target="_blank" style="color:var(--accent);">Mở canvas đầy đủ ↗</a>
+    </p>
+  </section>
+
+  <!-- 05. Design Rules -->
+  <section>
+    <div class="section-label">05 — Design Rules</div>
+    <h2>Nguyên tắc thiết kế</h2>
+    <p>Áp dụng <strong>Hallmark modern-minimal</strong> — genre dành cho utility tool, dev-adjacent. Mọi quyết định màu, chữ, spacing đều có rule cụ thể, không phải cảm tính.</p>
+
+    <div class="rules-grid" style="margin-top:20px;">
+
+      <!-- Color -->
+      <div class="rule-card full">
+        <div class="rule-tag color">Color System</div>
+        <h3>OKLCH — không dùng hex hay HSL</h3>
+        <p>Perceptually uniform: lightness thật sự đồng đều khi mix màu. Toàn bộ palette tinted về anchor hue forest-green H155 — kể cả neutral. Accent chiếm tối đa 3% viewport.</p>
+
+        <div class="swatch-row">
+          <div class="swatch">
+            <div class="swatch-dot" style="background:oklch(97% 0.008 155);"></div>
+            <div class="swatch-label">paper<br>97% C.008</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-dot" style="background:oklch(94% 0.012 155);"></div>
+            <div class="swatch-label">paper-2<br>94% C.012</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-dot" style="background:oklch(84% 0.010 155);"></div>
+            <div class="swatch-label">rule<br>84% C.010</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-dot" style="background:oklch(58% 0.008 155);"></div>
+            <div class="swatch-label">neutral<br>58% C.008</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-dot" style="background:oklch(44% 0.008 150);"></div>
+            <div class="swatch-label">muted<br>44% C.008</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-dot" style="background:oklch(18% 0.012 155);"></div>
+            <div class="swatch-label">ink<br>18% C.012</div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-dot" style="background:oklch(40% 0.14 155);border-color:oklch(40% 0.14 155);"></div>
+            <div class="swatch-label" style="color:#1E6B45;font-weight:600;">accent<br>40% C.14</div>
+          </div>
+        </div>
+
+        <div class="token-block">
+<span class="t-key">--color-paper:   </span><span class="t-val">oklch(97% 0.008 155)</span><span class="t-note">  /* base surface, tinted */</span>
+<span class="t-key">--color-ink:     </span><span class="t-val">oklch(18% 0.012 155)</span><span class="t-note">  /* text — không dùng #000 */</span>
+<span class="t-key">--color-accent:  </span><span class="t-val">oklch(40% 0.14  155)</span><span class="t-note">  /* forest-green, chroma 0.14 */</span>
+<span class="t-key">--color-rule:    </span><span class="t-val">oklch(84% 0.010 155)</span><span class="t-note">  /* border, divider */</span>
+<span class="t-key">--color-muted:   </span><span class="t-val">oklch(44% 0.008 150)</span><span class="t-note">  /* secondary text */</span></div>
+      </div>
+
+      <!-- Typography -->
+      <div class="rule-card">
+        <div class="rule-tag type">Typography</div>
+        <h3>2 + 1 font — không hơn</h3>
+        <p>Display + Body dùng cùng family (Geist). Mono (JetBrains) là outlier cho coordinates, labels, timestamps — xuất hiện tối đa 2 role, không phải font thứ ba tràn lan.</p>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:baseline;gap:10px;">
+            <span style="font-size:22px;font-weight:700;letter-spacing:-0.03em;color:var(--text);font-family:'Be Vietnam Pro',sans-serif;">Geist</span>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">700 · display / heading</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:10px;">
+            <span style="font-size:15px;font-weight:400;color:var(--text);">Geist Regular</span>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">400 · body / UI</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:10px;">
+            <span style="font-size:13px;font-family:var(--mono);color:var(--text-muted);">JetBrains Mono</span>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">400 · coords, labels</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px;">
+          Tracking: <code style="font-family:var(--mono);font-size:11px;">-0.03em</code> trên display, <code style="font-family:var(--mono);font-size:11px;">+0.08em</code> trên mono labels.
+        </div>
+      </div>
+
+      <!-- Spacing -->
+      <div class="rule-card">
+        <div class="rule-tag space">Spacing</div>
+        <h3>4pt base — mọi value là bội số</h3>
+        <p>Padding, gap, margin đều là bội của 4px. Không có giá trị lẻ như 7px hay 11px — đảm bảo alignment nhất quán khi code thật.</p>
+        <div style="margin-top:12px;display:flex;gap:6px;align-items:flex-end;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            <div style="width:8px;background:var(--accent-light);border:1px solid #B8DEC9;border-radius:3px;" style="height:8px;"></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--text-muted);">8</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:12px;height:12px;background:var(--accent-light);border:1px solid #B8DEC9;border-radius:3px;"></div><span style="font-family:var(--mono);font-size:9px;color:var(--text-muted);">12</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:16px;height:16px;background:var(--accent-light);border:1px solid #B8DEC9;border-radius:3px;"></div><span style="font-family:var(--mono);font-size:9px;color:var(--text-muted);">16</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:20px;height:20px;background:var(--accent-light);border:1px solid #B8DEC9;border-radius:3px;"></div><span style="font-family:var(--mono);font-size:9px;color:var(--text-muted);">20</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:24px;height:24px;background:var(--accent-light);border:1px solid #B8DEC9;border-radius:3px;"></div><span style="font-family:var(--mono);font-size:9px;color:var(--text-muted);">24</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:32px;height:32px;background:var(--accent-light);border:1px solid #B8DEC9;border-radius:3px;"></div><span style="font-family:var(--mono);font-size:9px;color:var(--text-muted);">32</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:48px;height:48px;background:var(--accent-light);border:1px solid #B8DEC9;border-radius:3px;"></div><span style="font-family:var(--mono);font-size:9px;color:var(--text-muted);">48</span></div>
+        </div>
+        <p style="margin-top:12px;font-size:12px;">Touch target tối thiểu: <strong>44px</strong> (iOS HIG). Buttons và tab icons đều đạt mức này.</p>
+      </div>
+
+      <!-- Motion -->
+      <div class="rule-card">
+        <div class="rule-tag motion">Motion</div>
+        <h3>Motion-cut — không reveal, không float</h3>
+        <p>Modern-minimal không dùng scroll-reveal hay fade-slide. Motion chỉ xuất hiện khi trả lời action của user — copy feedback, GPS pulse, bottom sheet. Easing: cubic, không overshoot.</p>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px;">
+          <div class="allow-item">Copy tap → brief scale(0.97) feedback, 80ms</div>
+          <div class="allow-item">GPS dot → subtle pulse 2s loop</div>
+          <div class="allow-item">Bottom sheet → slide-up 240ms ease-out</div>
+          <div class="ban-item">Scroll reveal / fade-in on sections</div>
+          <div class="ban-item">Spring overshoot, bouncy easing</div>
+          <div class="ban-item">Decorative floating animation</div>
+        </div>
+      </div>
+
+      <!-- Radius + Component voice -->
+      <div class="rule-card">
+        <div class="rule-tag space">Radius</div>
+        <h3>Pill CTA, tight panels</h3>
+        <p>Primary action dùng <code style="font-family:var(--mono);font-size:11px;">border-radius: 999px</code> (pill). Cards và panels dùng <code style="font-family:var(--mono);font-size:11px;">14–22px</code>. Không round-everything — tab bar flat, table cells flat.</p>
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <div style="height:36px;padding:0 18px;background:oklch(18% 0.012 155);border-radius:999px;display:flex;align-items:center;">
+            <span style="font-size:12px;font-weight:600;color:oklch(97% 0.008 155);">pill — 999px</span>
+          </div>
+          <div style="height:36px;padding:0 16px;background:var(--surface);border:1px solid var(--border);border-radius:14px;display:flex;align-items:center;">
+            <span style="font-size:12px;color:var(--text-muted);">card — 14px</span>
+          </div>
+          <div style="height:36px;padding:0 16px;background:var(--surface);border:1px solid var(--border);border-radius:22px;display:flex;align-items:center;">
+            <span style="font-size:12px;color:var(--text-muted);">sheet — 22px</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bans -->
+      <div class="rule-card">
+        <div class="rule-tag ban">Hard Bans</div>
+        <h3>Không được làm</h3>
+        <p>Các pattern bị cấm tuyệt đối theo Hallmark — những thứ AI thường default vào và làm UI trông generic.</p>
+        <div class="ban-list" style="margin-top:10px;">
+          <div class="ban-item">Pure <code style="font-family:var(--mono);font-size:11px;">#000</code> hoặc <code style="font-family:var(--mono);font-size:11px;">#fff</code> — luôn dùng OKLCH tinted</div>
+          <div class="ban-item">Gradient purple→cyan, orange→pink</div>
+          <div class="ban-item">Accent làm background fill &gt;5% viewport</div>
+          <div class="ban-item">Italic heading — dùng weight hoặc màu để nhấn</div>
+          <div class="ban-item">Inter, Roboto, Poppins — banned default fonts</div>
+          <div class="ban-item">Glassmorphism, fake blur card</div>
+          <div class="ban-item">3-column equal-card row ("AI fingerprint")</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 06. Kiến trúc -->
+  <section>
+    <div class="section-label">06 — Kiến trúc</div>
+    <h2>Luồng xử lý</h2>
+    <div class="arch-box"><span class="c-muted">GPS / Input lat,lng
+          │
+          ▼
+┌─────────────────────────────────────────┐
+│           </span><span class="c-accent">R-tree Spatial Index</span><span class="c-muted">              │  ← boundary polygons
+│   Lọc nhanh bằng bounding box          │     loaded vào RAM
+│   → ~5 polygon candidates              │     lúc app khởi động
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│         </span><span class="c-accent">Point-in-Polygon</span><span class="c-muted">                 │
+│   Test thật sự trên candidates         │
+│   → match Tỉnh / Huyện / Xã           │
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│            </span><span class="c-accent">Cache Layer</span><span class="c-muted">                   │
+│   Lưu kết quả theo bbox cell          │
+│   → tọa độ gần nhau không query lại   │
+└─────────────────┬───────────────────────┘
+                  │
+          ┌───────┴────────┐
+          ▼                ▼
+    </span><span class="c-green">App Screen</span><span class="c-muted">         </span><span class="c-green">Home Widget</span><span class="c-muted">
+    (3 cấp đầy đủ)   (compact display)</span></div>
+
+    <p style="margin-top:16px;">
+      Boundary data (~30MB) được bundle sẵn trong app — <strong>hoạt động hoàn toàn offline</strong>. Không gọi API ngoài cho 3 cấp hành chính. Tên đường/số nhà (nếu cần) mới fallback sang Nominatim.
+    </p>
+  </section>
+
+  <!-- 07. Data layer -->
+  <section>
+    <div class="section-label">07 — Data Layer</div>
+    <h2>Boundary data & cập nhật</h2>
+    <table>
+      <thead>
+        <tr><th>Cấp</th><th>Nguồn gốc</th><th>Cập nhật khi nào</th><th>Kích thước</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Tỉnh / TP</td>
+          <td>GADM + tự merge sáp nhập 2025</td>
+          <td>Rất hiếm (vài năm/lần)</td>
+          <td>~2 MB</td>
+        </tr>
+        <tr>
+          <td>Quận / Huyện</td>
+          <td>GADM + tự merge</td>
+          <td>1–2 năm/lần</td>
+          <td>~8 MB</td>
+        </tr>
+        <tr>
+          <td>Phường / Xã</td>
+          <td>OSM Geofabrik</td>
+          <td>Theo đợt sáp nhập lớn</td>
+          <td>~20 MB</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:14px;">
+      Khi sáp nhập xảy ra: <code style="font-family:var(--mono);font-size:12px;background:var(--tag-bg);padding:2px 6px;border-radius:4px;">ST_Union(polygon_A, polygon_B)</code> → cập nhật tên/mã → ship data update qua OTA hoặc app update nhỏ.
+    </p>
+  </section>
+
+  <!-- 08. Tech stack -->
+  <section>
+    <div class="section-label">08 — Tech Stack</div>
+    <h2>Công nghệ sử dụng</h2>
+
+    <table>
+      <thead>
+        <tr><th>Layer</th><th>Lựa chọn</th><th>Lý do</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Framework</td>
+          <td>Flutter</td>
+          <td>1 codebase cho Android + iOS, widget support tốt trên cả hai</td>
+        </tr>
+        <tr>
+          <td>Widget (Android)</td>
+          <td>Glance (Jetpack)</td>
+          <td>Modern API, Compose-based, dễ maintain</td>
+        </tr>
+        <tr>
+          <td>Widget (iOS)</td>
+          <td>WidgetKit (SwiftUI)</td>
+          <td>Native, hỗ trợ timeline update</td>
+        </tr>
+        <tr>
+          <td>Spatial index</td>
+          <td>Dart R-tree / native FFI</td>
+          <td>Query &lt;5ms cho 10k polygon</td>
+        </tr>
+        <tr>
+          <td>Geometry</td>
+          <td>GEOS (via FFI)</td>
+          <td>Point-in-polygon chính xác, proven</td>
+        </tr>
+        <tr>
+          <td>Storage</td>
+          <td>SQLite + SpatiaLite</td>
+          <td>Lưu boundary + cache kết quả, offline hoàn toàn</td>
+        </tr>
+        <tr>
+          <td>Data format</td>
+          <td>FlatGeobuf</td>
+          <td>Đọc theo bbox, không load toàn bộ file</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 09. Lộ trình -->
+  <section>
+    <div class="section-label">09 — Lộ trình</div>
+    <h2>Các giai đoạn phát triển</h2>
+    <div class="roadmap">
+      <div class="roadmap-item">
+        <div class="roadmap-dot active">M1</div>
+        <div class="roadmap-body">
+          <h3>MVP — Geocoder lõi</h3>
+          <div class="r-time">1–2 tuần</div>
+          <ul>
+            <li>Load GADM data, build R-tree index</li>
+            <li>Point-in-Polygon trả về 3 cấp</li>
+            <li>Screen tra cứu: nhập lat/lng + hiển thị kết quả</li>
+            <li>Copy address 1 chạm</li>
+          </ul>
+        </div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-dot">M2</div>
+        <div class="roadmap-body">
+          <h3>Widget</h3>
+          <div class="r-time">1–2 tuần</div>
+          <ul>
+            <li>Widget nhỏ: vị trí hiện tại (GPS auto-update)</li>
+            <li>Widget lớn: 3 cấp + tọa độ</li>
+            <li>Background location permission handling</li>
+            <li>Cache tránh query lại khi ít di chuyển</li>
+          </ul>
+        </div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-dot">M3</div>
+        <div class="roadmap-body">
+          <h3>Map picker + Lịch sử</h3>
+          <div class="r-time">1 tuần</div>
+          <ul>
+            <li>Tap on map → lấy địa chỉ điểm đó</li>
+            <li>Lịch sử 20 điểm gần nhất</li>
+            <li>Export danh sách</li>
+          </ul>
+        </div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-dot">M4</div>
+        <div class="roadmap-body">
+          <h3>Data maintenance tooling</h3>
+          <div class="r-time">1 tuần</div>
+          <ul>
+            <li>Script merge polygon khi sáp nhập</li>
+            <li>Validate data sau mỗi lần update</li>
+            <li>OTA data update (không cần release app)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. Rủi ro -->
+  <section>
+    <div class="section-label">10 — Rủi ro</div>
+    <h2>Rủi ro & Giải pháp</h2>
+    <div class="risk-list">
+      <div class="risk-item">
+        <div>
+          <div class="r-tag tag-high">Cao</div>
+          <div class="r-problem">GADM chưa cập nhật sáp nhập 2025</div>
+        </div>
+        <div class="r-solution">Tự merge polygon từ danh sách sáp nhập chính phủ. Script Union đơn giản, làm một lần.</div>
+      </div>
+      <div class="risk-item">
+        <div>
+          <div class="r-tag tag-med">Trung bình</div>
+          <div class="r-problem">Widget iOS bị giới hạn background refresh</div>
+        </div>
+        <div class="r-solution">WidgetKit timeline: schedule refresh mỗi 15–30 phút. Hiển thị "last updated" để user biết.</div>
+      </div>
+      <div class="risk-item">
+        <div>
+          <div class="r-tag tag-med">Trung bình</div>
+          <div class="r-problem">Boundary không chính xác ở vùng biên giáp ranh</div>
+        </div>
+        <div class="r-solution">Thêm "confidence radius" — nếu điểm gần ranh giới (&lt;100m) hiển thị cả 2 phường/xã liền kề.</div>
+      </div>
+      <div class="risk-item">
+        <div>
+          <div class="r-tag tag-low">Thấp</div>
+          <div class="r-problem">30MB data làm app nặng</div>
+        </div>
+        <div class="r-solution">FlatGeobuf + đọc lazy theo viewport. Cấp xã/phường chỉ load khi zoom gần.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <span>VN Address Widget App — Internal Tool</span>
+    <span>21/09/2026</span>
+  </footer>
+
+</div>
+</body>
+</html>

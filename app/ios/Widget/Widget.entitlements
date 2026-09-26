@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<!-- ADR 0002 §4: shared App Group container for the boundary dataset
+		     and widget/last_result.json. Replace with the real Team ID once
+		     provisioning is set up. -->
+		<string>group.com.vnaddress.widget</string>
+	</array>
+</dict>
+</plist>
